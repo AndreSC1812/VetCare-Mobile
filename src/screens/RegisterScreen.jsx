@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import MySvg from "../../assets/vetcare-logo-verde.svg"; // Asegúrate de que la ruta sea correcta
+import Icon from "react-native-vector-icons/MaterialIcons"; // Importa el ícono de Material Icons
+import { registerRequest } from "../api/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importa AsyncStorage
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -14,16 +17,53 @@ const RegisterScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!username || !email || !password || !confirmPassword) {
       setError("Por favor, completa todos los campos");
-    } else if (password !== confirmPassword) {
+      return;
+    }
+    if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
-    } else {
-      setError("");
-      console.log("Registrando usuario:", username, email);
-      navigation.navigate("Login"); // Navega al login después del registro
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const client = {
+        username,
+        email,
+        password,
+        userType: "client",
+      };
+
+      const response = await registerRequest(client);
+
+      if (response.status === 201) {
+        const { token } = response.data;
+        await AsyncStorage.setItem("token", token);
+        navigation.navigate("CompleteProfile");
+      } else {
+        setError("Error al registrar, intenta de nuevo");
+      }
+    } catch (error) {
+      // Usar mensaje específico del servidor si está disponible
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("Error en la conexión, intenta de nuevo");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,28 +84,58 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirmar Contraseña"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry={true}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.inputPassword}
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+        />
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <Icon
+            name={showPassword ? "visibility-off" : "visibility"}
+            size={24}
+            color="#3bbba4"
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.inputPassword}
+          placeholder="Confirmar Contraseña"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!showConfirmPassword}
+        />
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          <Icon
+            name={showConfirmPassword ? "visibility-off" : "visibility"}
+            size={24}
+            color="#3bbba4"
+          />
+        </TouchableOpacity>
+      </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Registrarse</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Registrando..." : "Registrarse"}
+        </Text>
       </TouchableOpacity>
-      <View style={styles.loginContainer}>
-        <Text>¿Ya tienes cuenta?</Text>
+      <View style={styles.registerContainer}>
+        <Text>¿Ya tienes cuenta? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.loginText}>Inicia sesión aquí</Text>
+          <Text style={styles.registerText}>Inicia sesión aquí</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -96,6 +166,26 @@ const styles = StyleSheet.create({
     width: "100%", // Ancho completo
     backgroundColor: "white", // Fondo blanco para los inputs
   },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    borderColor: "#3bbba4",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: "white", // Fondo blanco
+  },
+  inputPassword: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 10,
+  },
+  toggleButton: {
+    paddingHorizontal: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   error: {
     color: "red",
     marginBottom: 10,
@@ -114,12 +204,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
-  loginContainer: {
+  registerContainer: {
     marginTop: 20,
     flexDirection: "row",
     justifyContent: "center",
   },
-  loginText: {
+  registerText: {
     color: "#3bbba4",
     marginLeft: 5,
     textDecorationLine: "underline", // Subraya el texto

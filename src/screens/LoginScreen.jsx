@@ -6,20 +6,51 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import MySvg from "../../assets/vetcare-logo-verde.svg"; // Asegúrate de que la ruta sea correcta
+import MySvg from "../../assets/vetcare-logo-verde.svg";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { loginRequest } from "../api/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importa AsyncStorage
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    if (email === "" || password === "") {
+  const handleLogin = async () => {
+    if (!email || !password) {
       setError("Por favor, completa todos los campos");
-    } else {
-      setError("");
-      console.log("Iniciar sesión con", email, password);
-      navigation.navigate("Register"); // Navega a la pantalla de registro (o a la que desees)
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const credentials = { email, password, userType: "client" };
+      const response = await loginRequest(credentials);
+
+      if (response.status === 200) {
+        const { token } = response.data;
+        await AsyncStorage.setItem("token", token);
+        navigation.navigate("Home");
+      } else {
+        setError("Error al iniciar sesión, intenta de nuevo");
+      }
+    } catch (error) {
+      // Usar mensaje específico del servidor si está disponible
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("Error en la conexión, intenta de nuevo");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,16 +65,34 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.inputPassword}
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+        />
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <Icon
+            name={showPassword ? "visibility-off" : "visibility"}
+            size={24}
+            color="#3bbba4"
+          />
+        </TouchableOpacity>
+      </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Iniciar Sesión</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Iniciando..." : "Iniciar Sesión"}
+        </Text>
       </TouchableOpacity>
       <View style={styles.registerContainer}>
         <Text>¿No tienes cuenta? </Text>
@@ -58,15 +107,15 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F7F7", // Fondo de la pantalla
+    backgroundColor: "#F7F7F7",
     alignItems: "center",
-    justifyContent: "center", // Centra verticalmente
-    paddingHorizontal: 20, // Espaciado horizontal
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
-    marginVertical: 20, // Espaciado vertical
-    color: "#3bbba4", // Color del texto
+    marginVertical: 20,
+    color: "#3bbba4",
     textAlign: "center",
   },
   input: {
@@ -76,8 +125,28 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     borderRadius: 5,
-    width: "100%", // Ancho completo
-    backgroundColor: "white", // Fondo blanco para los inputs
+    width: "100%",
+    backgroundColor: "white",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    borderColor: "#3bbba4",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: "white",
+  },
+  inputPassword: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 10,
+  },
+  toggleButton: {
+    paddingHorizontal: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   error: {
     color: "red",
@@ -87,10 +156,10 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#3bbba4",
     height: 40,
-    width: "100%", // Ancho completo
-    justifyContent: "center", // Centra el texto verticalmente
-    alignItems: "center", // Centra el texto horizontalmente
-    borderRadius: 5, // Esquinas redondeadas
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
     marginBottom: 15,
   },
   buttonText: {
@@ -105,7 +174,7 @@ const styles = StyleSheet.create({
   registerText: {
     color: "#3bbba4",
     marginLeft: 5,
-    textDecorationLine: "underline", // Subraya el texto
+    textDecorationLine: "underline",
   },
 });
 
