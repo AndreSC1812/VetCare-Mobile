@@ -32,14 +32,14 @@ const LoginScreen = ({ navigation }) => {
       const response = await loginRequest(credentials);
 
       if (response.status === 200) {
-        const { token } = response.data;
-        await AsyncStorage.setItem("token", token);
-        navigation.navigate("Home");
+        const { token, user } = response.data; // El backend devuelve el usuario con el id y el token
+        await AsyncStorage.setItem("token", token); // Guardar el token
+        await AsyncStorage.setItem("clientId", user.id.toString()); // Guardar el ID del cliente
+        navigation.navigate("HomeTabs"); // Navegar a la pantalla principal
       } else {
         setError("Error al iniciar sesión, intenta de nuevo");
       }
     } catch (error) {
-      // Usar mensaje específico del servidor si está disponible
       if (
         error.response &&
         error.response.data &&

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -33,7 +33,8 @@ const UploadPetImageScreen = ({ route, navigation }) => {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const selectedImage = result.assets[0]; // Accedemos al primer asset
+      setImageUri(selectedImage.uri); // Guardamos solo la URI de la imagen seleccionada
     }
   };
 
@@ -43,6 +44,8 @@ const UploadPetImageScreen = ({ route, navigation }) => {
       return;
     }
 
+    setLoading(true); // Establecemos el estado de carga a true
+
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -51,15 +54,18 @@ const UploadPetImageScreen = ({ route, navigation }) => {
         return;
       }
 
+      // Aquí obtenemos el tipo MIME del archivo
+      const fileExtension = imageUri.split(".").pop(); // Obtener la extensión del archivo
+
       const formData = new FormData();
       formData.append("petImage", {
         uri: imageUri,
-        type: "image/jpeg",
-        name: `pet_image_${Date.now()}.jpg`,
+        type: `image/${fileExtension}`, // Asignar el tipo correcto según la extensión
+        name: `pet_image_${Date.now()}.${fileExtension}`, // Ajustar el nombre del archivo con la extensión
       });
 
       const response = await axios.post(
-        `http://192.168.0.29:3000/api/pets/${petId}/upload`,
+        `http://192.168.0.29:3000/api/pets/${petId}/upload`, // Verifica que esta IP sea accesible
         formData,
         {
           headers: {
@@ -71,13 +77,30 @@ const UploadPetImageScreen = ({ route, navigation }) => {
 
       if (response.status === 200) {
         Alert.alert("Éxito", "Imagen de la mascota subida.");
-        navigation.navigate("Home");
+        navigation.navigate("HomeTabs");
       } else {
         Alert.alert("Error", "Hubo un problema al subir la imagen.");
       }
     } catch (error) {
       console.error("Error subiendo la imagen:", error);
-      Alert.alert("Error", "Hubo un error al subir la imagen.");
+      if (error.response) {
+        // Si el servidor responde con un error (código de estado 4xx, 5xx)
+        console.error("Error en la respuesta del servidor:", error.response);
+        Alert.alert(
+          "Error en la respuesta del servidor",
+          `Código: ${error.response.status} - ${error.response.statusText}`
+        );
+      } else if (error.request) {
+        // Si la solicitud fue realizada pero no hubo respuesta
+        console.error("Error en la solicitud:", error.request);
+        Alert.alert("Error de red", "No se recibió respuesta del servidor.");
+      } else {
+        // Si ocurre un error al configurar la solicitud
+        console.error("Error desconocido:", error.message);
+        Alert.alert("Error desconocido", error.message);
+      }
+    } finally {
+      setLoading(false); // Desactivamos el estado de carga al final
     }
   };
 

@@ -3,10 +3,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen"; // Pantalla de inicio de sesión
 import RegisterScreen from "../screens/RegisterScreen"; // Pantalla de registro
-import HomeScreen from "../screens/HomeScreen"; // Pantalla Home
 import CompleteProfileScreen from "../screens/CompleteProfileScreen";
 import CreateFirstPetScreen from "../screens/CreateFirstPetScreen";
 import UploadPetImageScreen from "../screens/UploadPetImageScreen";
+import HomeTabs from "../components/HomeTabs"; //Nuestas tabs que muestran el contenido
+import CreatePetScreen from "../screens/CreatePetScreen";
+import PetDetailScreen from "../screens/PetDetailScreen";
+import UpdatePetScreen from "../screens/UpdatePetScreen";
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
@@ -19,10 +23,13 @@ const AppNavigator = () => {
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="PetDetail" component={PetDetailScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="UpdatePet" component={UpdatePetScreen} />
         <Stack.Screen name="CreateFirstPet" component={CreateFirstPetScreen} />
         <Stack.Screen name="UploadPetImage" component={UploadPetImageScreen} />
+        <Stack.Screen name="HomeTabs" component={HomeTabs} />
+        <Stack.Screen name="CreatePetScreen" component={CreatePetScreen} />
         <Stack.Screen
           name="CompleteProfile"
           component={CompleteProfileScreen}

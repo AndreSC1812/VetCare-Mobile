@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,41 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { getPetById } from "../api/pets"; // Asegúrate de tener la función getPetById en tu archivo API
 
-const CreateFirstPetScreen = ({ navigation }) => {
+const UpdatePetScreen = ({ route, navigation }) => {
+  const { petId } = route.params; // Obtenemos el petId desde los parámetros de la ruta
   const [petName, setPetName] = useState("");
   const [petSpecies, setPetSpecies] = useState("");
   const [petAge, setPetAge] = useState("");
-  const [petChipNumber, setPetChipNumber] = useState(""); // Nuevo estado para chipNumber
-  const [petWeight, setPetWeight] = useState(""); // Nuevo estado para weight
+  const [petChipNumber, setPetChipNumber] = useState("");
+  const [petWeight, setPetWeight] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Función para crear la mascota
-  const createPet = async () => {
+  // Función para cargar los detalles de la mascota
+  const loadPetData = async () => {
+    try {
+      setLoading(true);
+      const pet = await getPetById(petId); // Obtener los detalles de la mascota usando el petId
+      setPetName(pet.name);
+      setPetSpecies(pet.species);
+      setPetAge(pet.age.toString()); // Asegurarnos de que la edad esté en formato texto
+      setPetChipNumber(pet.chipNumber);
+      setPetWeight(pet.weight.toString()); // Asegurarnos de que el peso esté en formato texto
+    } catch (error) {
+      console.error("Error cargando los detalles de la mascota:", error);
+      Alert.alert("Error", "No se pudo cargar los detalles de la mascota.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPetData(); // Llamamos a la función cuando el componente se monta
+  }, [petId]);
+
+  // Función para actualizar los datos de la mascota
+  const updatePetData = async () => {
     // Validación para asegurarse de que todos los campos estén completos
     if (!petName || !petSpecies || !petAge || !petChipNumber || !petWeight) {
       Alert.alert(
@@ -58,9 +82,9 @@ const CreateFirstPetScreen = ({ navigation }) => {
         return;
       }
 
-      // Enviar la solicitud para crear la mascota
-      const response = await axios.post(
-        "http://192.168.0.29:3000/api/pets", // Endpoint para crear la mascota
+      // Enviar la solicitud para actualizar la mascota
+      const response = await axios.put(
+        `http://192.168.0.29:3000/api/pets/${petId}`, // Endpoint para actualizar la mascota
         {
           name: petName,
           species: petSpecies,
@@ -74,16 +98,18 @@ const CreateFirstPetScreen = ({ navigation }) => {
       );
 
       // Verificar si la solicitud fue exitosa
-      if (response.status === 201) {
-        Alert.alert("Éxito", "Mascota creada exitosamente.");
-        // Navegar a la siguiente pantalla donde se elegirá la imagen de la mascota
-        navigation.navigate("UploadPetImage", { petId: response.data.pet._id });
+      if (response.status === 200) {
+        Alert.alert("Éxito", "Datos de la mascota actualizados exitosamente.");
+        navigation.goBack(); // Regresar a la pantalla anterior
       } else {
-        Alert.alert("Error", "No se pudo crear la mascota.");
+        Alert.alert("Error", "No se pudo actualizar los datos de la mascota.");
       }
     } catch (error) {
-      console.error("Error creando la mascota:", error);
-      Alert.alert("Error", "Hubo un error al crear la mascota.");
+      console.error("Error actualizando los datos de la mascota:", error);
+      Alert.alert(
+        "Error",
+        "Hubo un error al actualizar los datos de la mascota."
+      );
     } finally {
       setLoading(false);
     }
@@ -91,7 +117,7 @@ const CreateFirstPetScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Añade Primera Mascota</Text>
+      <Text style={styles.title}>Actualizar Datos de la Mascota</Text>
 
       <TextInput
         style={styles.input}
@@ -132,11 +158,11 @@ const CreateFirstPetScreen = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={createPet}
+        onPress={updatePetData}
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Creando..." : "Crear Mascota"}
+          {loading ? "Actualizando..." : "Actualizar Mascota"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -182,4 +208,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateFirstPetScreen;
+export default UpdatePetScreen;

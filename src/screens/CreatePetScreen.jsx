@@ -10,15 +10,14 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const CreateFirstPetScreen = ({ navigation }) => {
+const CreatePetScreen = ({ navigation }) => {
   const [petName, setPetName] = useState("");
   const [petSpecies, setPetSpecies] = useState("");
   const [petAge, setPetAge] = useState("");
-  const [petChipNumber, setPetChipNumber] = useState(""); // Nuevo estado para chipNumber
-  const [petWeight, setPetWeight] = useState(""); // Nuevo estado para weight
+  const [petChipNumber, setPetChipNumber] = useState(""); // Nuevo campo para chipNumber
+  const [petWeight, setPetWeight] = useState(""); // Nuevo campo para peso
   const [loading, setLoading] = useState(false);
 
-  // Función para crear la mascota
   const createPet = async () => {
     // Validación para asegurarse de que todos los campos estén completos
     if (!petName || !petSpecies || !petAge || !petChipNumber || !petWeight) {
@@ -54,7 +53,7 @@ const CreateFirstPetScreen = ({ navigation }) => {
       // Obtener el token de autenticación
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert("Error", "Token missing. Please log in again.");
+        Alert.alert("Error", "Token faltante. Inicia sesión nuevamente.");
         return;
       }
 
@@ -91,7 +90,7 @@ const CreateFirstPetScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Añade Primera Mascota</Text>
+      <Text style={styles.title}>Añadir Mascota</Text>
 
       <TextInput
         style={styles.input}
@@ -136,7 +135,7 @@ const CreateFirstPetScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Creando..." : "Crear Mascota"}
+          {loading ? "Creando..." : "Guardar Mascota"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -182,4 +181,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateFirstPetScreen;
+export default CreatePetScreen;

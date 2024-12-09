@@ -1,3 +1,4 @@
+// RegisterScreen.js
 import React, { useState } from "react";
 import {
   View,
@@ -45,9 +46,10 @@ const RegisterScreen = ({ navigation }) => {
       const response = await registerRequest(client);
 
       if (response.status === 201) {
-        const { token } = response.data;
-        await AsyncStorage.setItem("token", token);
-        navigation.navigate("CompleteProfile");
+        const { token, user } = response.data; // Se espera que el backend devuelva el usuario con su ID
+        await AsyncStorage.setItem("token", token); // Guarda el token
+        await AsyncStorage.setItem("clientId", user.id.toString()); // Guarda el ID del cliente
+        navigation.navigate("CompleteProfile"); // Navegar a la pantalla de completar perfil
       } else {
         setError("Error al registrar, intenta de nuevo");
       }
