@@ -9,7 +9,7 @@ import {
 import MySvg from "../../assets/vetcare-logo-verde.svg";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { loginRequest } from "../api/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importa AsyncStorage
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -20,7 +20,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError("Por favor, completa todos los campos");
       return;
     }
 
@@ -32,12 +32,12 @@ const LoginScreen = ({ navigation }) => {
       const response = await loginRequest(credentials);
 
       if (response.status === 200) {
-        const { token, user } = response.data;
-        await AsyncStorage.setItem("token", token);
-        await AsyncStorage.setItem("clientId", user.id.toString());
-        navigation.navigate("HomeTabs");
+        const { token, user } = response.data; // El backend devuelve el usuario con el id y el token
+        await AsyncStorage.setItem("token", token); // Guardar el token
+        await AsyncStorage.setItem("clientId", user.id.toString()); // Guardar el ID del cliente
+        navigation.navigate("HomeTabs"); // Navegar a la pantalla principal
       } else {
-        setError("Login failed, please try again");
+        setError("Error al iniciar sesión, intenta de nuevo");
       }
     } catch (error) {
       if (
@@ -47,7 +47,7 @@ const LoginScreen = ({ navigation }) => {
       ) {
         setError(error.response.data.message);
       } else {
-        setError("Connection error, please try again");
+        setError("Error en la conexión, intenta de nuevo");
       }
     } finally {
       setLoading(false);
@@ -57,20 +57,18 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MySvg width={150} height={150} />
-      <Text style={styles.title}>Login</Text>
-
+      <Text style={styles.title}>Iniciar Sesión</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Correo Electrónico"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.inputPassword}
-          placeholder="Password"
+          placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
@@ -86,23 +84,20 @@ const LoginScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-
       {error ? <Text style={styles.error}>{error}</Text> : null}
-
       <TouchableOpacity
         style={styles.button}
         onPress={handleLogin}
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Iniciando..." : "Iniciar Sesión"}
         </Text>
       </TouchableOpacity>
-
       <View style={styles.registerContainer}>
-        <Text>Don't have an account? </Text>
+        <Text>¿No tienes cuenta? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text style={styles.registerText}>Register here</Text>
+          <Text style={styles.registerText}>Regístrate aquí</Text>
         </TouchableOpacity>
       </View>
     </View>

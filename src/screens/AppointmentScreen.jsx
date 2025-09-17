@@ -4,136 +4,186 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { createAppointment } from "../api/appointment";
 
 const AppointmentScreen = ({ route, navigation }) => {
-  const { veterinarianId, startTime, endTime } = route.params; // Get veterinarian working hours from route params
-  const [selectedDate, setSelectedDate] = useState(null); // null means no date selected yet
+  const { veterinarianId, startTime, endTime } = route.params; // Recibimos el horario de atención
+  const [selectedDate, setSelectedDate] = useState(null); // Usamos null para indicar que aún no se ha seleccionado una fecha
   const [showPicker, setShowPicker] = useState(false);
-  const [mode, setMode] = useState("date"); // "date" or "time"
+  const [mode, setMode] = useState("date"); // Puede ser 'date' o 'time'
 
-  // Handle change in DateTimePicker
-  const onChange = (event, date) => {
-    if (date) {
+  // Función para manejar el cambio de fecha/hora
+  const onChange = (event, selectedDate) => {
+    if (selectedDate) {
       if (mode === "date") {
-        setMode("time"); // switch to time picker after selecting date
+        // Cambiamos al modo de hora tras seleccionar la fecha
+        setMode("time");
         setShowPicker(true);
-        setSelectedDate((prev) => {
-          const updated = new Date(prev);
-          updated.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-          return updated;
+        setSelectedDate((prevDate) => {
+          const updatedDate = new Date(prevDate);
+          updatedDate.setFullYear(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate()
+          );
+          return updatedDate;
         });
       } else {
-        setShowPicker(false); // close picker after selecting time
-        setSelectedDate((prev) => {
-          const updated = new Date(prev);
-          updated.setHours(date.getHours(), date.getMinutes());
-          return updated;
+        // Cerramos el picker tras seleccionar la hora
+        setShowPicker(false);
+        setSelectedDate((prevDate) => {
+          const updatedDate = new Date(prevDate);
+          updatedDate.setHours(
+            selectedDate.getHours(),
+            selectedDate.getMinutes()
+          );
+          return updatedDate;
         });
       }
     } else {
-      setShowPicker(false); // close picker if canceled
+      setShowPicker(false); // Cerramos si no se selecciona nada
     }
   };
 
-  // Show the date/time picker
+  // Función para mostrar el picker
   const showDateTimePicker = () => {
     setMode("date");
     setShowPicker(true);
   };
 
-  // Check if the selected time is within veterinarian working hours
+  // Función para verificar si la hora seleccionada está dentro del horario del veterinario
   const isWithinWorkingHours = (date) => {
     const [startHour, startMinute] = startTime.split(":");
     const [endHour, endMinute] = endTime.split(":");
 
-    const selectedMinutes = date.getHours() * 60 + date.getMinutes();
+    // Extraemos solo la hora y minuto de la fecha seleccionada
+    const selectedHour = date.getHours();
+    const selectedMinute = date.getMinutes();
+
+    // Convertimos las horas de inicio y fin a minutos para facilitar la comparación
     const startMinutes = parseInt(startHour) * 60 + parseInt(startMinute);
     const endMinutes = parseInt(endHour) * 60 + parseInt(endMinute);
+    const selectedMinutes = selectedHour * 60 + selectedMinute;
 
+    // Verificamos si la hora seleccionada está dentro del rango
     return selectedMinutes >= startMinutes && selectedMinutes <= endMinutes;
   };
 
-  // Confirm appointment
   const handleConfirmAppointment = async () => {
     if (!selectedDate) {
-      Alert.alert("Selection required", "Please select a date and time before confirming.");
+      Alert.alert(
+        "Selección requerida",
+        "Por favor, selecciona una fecha y hora antes de confirmar la cita."
+      );
       return;
     }
 
     if (!isWithinWorkingHours(selectedDate)) {
-      Alert.alert("Invalid time", "Selected time is outside the veterinarian's working hours.");
+      Alert.alert(
+        "Hora inválida",
+        "La hora seleccionada no está dentro del horario de atención del veterinario."
+      );
       return;
     }
 
     try {
-      await createAppointment(veterinarianId, selectedDate);
+      const appointment = await createAppointment(veterinarianId, selectedDate);
       Alert.alert(
-        "Appointment Requested",
-        `Your appointment has been requested for ${formatDate(selectedDate)}`
+        "Solicitud de cita creada",
+        `Tu cita ha sido solicitada para el ${formatDate(selectedDate)}`
       );
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Failed to create appointment.");
+      Alert.alert("Error", "No se pudo crear la cita.");
     }
   };
 
-  // Format date/time for display
-  const formatDate = (date) =>
-    date.toLocaleString([], {
+  // Función para formatear la fecha
+  const formatDate = (date) => {
+    return date.toLocaleString([], {
       hour: "2-digit",
       minute: "2-digit",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     });
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Select a date and time for your appointment:</Text>
+      <Text style={styles.title}>Selecciona fecha y hora para tu cita:</Text>
+
+      {/* Mostrar horario del veterinario */}
       <Text style={styles.workingHours}>
-        Veterinarian Hours: {startTime} - {endTime}
+        Horario del Veterinario: {startTime} - {endTime}
       </Text>
 
+      {/* Mostrar la fecha seleccionada solo si existe */}
       <Text style={styles.selectedDate}>
         {selectedDate
-          ? `Selected date and time: ${formatDate(selectedDate)}`
-          : "No date and time selected yet"}
+          ? `Fecha y hora seleccionada: ${formatDate(selectedDate)}`
+          : "Selecciona una fecha y hora"}
       </Text>
 
       <TouchableOpacity style={styles.button} onPress={showDateTimePicker}>
-        <Text style={styles.buttonText}>Select Date & Time</Text>
+        <Text style={styles.buttonText}>Seleccionar fecha y hora</Text>
       </TouchableOpacity>
 
       {showPicker && (
         <DateTimePicker
-          value={selectedDate || new Date()}
+          value={selectedDate || new Date()} // Si no hay fecha seleccionada, mostramos la fecha actual
           mode={mode}
-          display="spinner"
+          display="spinner" // Usamos el spinner como estilo
           onChange={onChange}
-          minimumDate={new Date()} // prevent past dates
+          minimumDate={new Date()} // Evita seleccionar fechas pasadas
         />
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleConfirmAppointment}>
-        <Text style={styles.buttonText}>Confirm Appointment</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleConfirmAppointment}
+      >
+        <Text style={styles.buttonText}>Confirmar Cita</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#f5f5f5" },
-  workingHours: { fontSize: 16, marginBottom: 10, color: "#555", fontStyle: "italic" },
-  title: { fontSize: 20, marginBottom: 20, fontWeight: "bold" },
-  selectedDate: { fontSize: 16, marginVertical: 20, color: "#333" },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+  },
+  workingHours: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#555",
+    fontStyle: "italic",
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 20,
+    fontWeight: "bold",
+  },
+  selectedDate: {
+    fontSize: 16,
+    marginVertical: 20,
+    color: "#333",
+  },
   button: {
-    backgroundColor: "#3bbba4",
+    backgroundColor: "#3bbba4", // Color similar al de los botones de la otra pantalla
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
     marginVertical: 10,
     alignItems: "center",
-    width: "80%",
+    width: "80%", // Establece un tamaño estándar para los botones
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default AppointmentScreen;

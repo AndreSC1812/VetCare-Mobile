@@ -8,55 +8,71 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getPetsByClient } from "../api/pets";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FAB } from "react-native-paper";
+import { getPetsByClient } from "../api/pets"; // Asegúrate de tener la ruta correcta
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importa AsyncStorage
+import { FAB } from "react-native-paper"; // Importa el componente FAB
 import { useNavigation } from "@react-navigation/native";
 
 const PetScreen = () => {
-  const navigation = useNavigation();
-  const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation(); // Para navegación
+  const [pets, setPets] = useState([]); // Estado para almacenar las mascotas
+  const [loading, setLoading] = useState(true); // Indicador de carga
+  const [refreshing, setRefreshing] = useState(false); // Indicador de refresco
 
+  // Función para obtener las mascotas
   const fetchPets = async () => {
     try {
-      setLoading(true);
-      const clientId = await AsyncStorage.getItem("clientId");
+      setLoading(true); // Mostrar el indicador de carga mientras se hace la solicitud
+      const clientId = await AsyncStorage.getItem("clientId"); // Obtener el clientId desde AsyncStorage
 
       if (clientId) {
-        const data = await getPetsByClient(clientId);
-        setPets(data);
+        const data = await getPetsByClient(clientId); // Obtener los datos de las mascotas
+        setPets(data); // Guardar los datos en el estado
       } else {
-        console.error("Client ID not found");
+        console.error("No se encontró el clientId");
       }
     } catch (error) {
-      console.error("Error fetching pets:", error);
+      console.error("Error al obtener las mascotas:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Cambiar el estado de carga una vez que se reciban los datos
     }
   };
 
+  // Cargar las mascotas al enfocarse en la pantalla
   useEffect(() => {
-    fetchPets();
+    fetchPets(); // Llamamos a la función de carga cuando la pantalla se renderiza
 
+    // Agregar listener para cuando la pantalla reciba el foco
     const unsubscribe = navigation.addListener("focus", () => {
-      fetchPets();
+      fetchPets(); // Recargar las mascotas cuando la pantalla reciba el foco
     });
 
+    // Limpiar el listener cuando el componente se desmonte
     return unsubscribe;
   }, [navigation]);
 
+  // Función para manejar el refresco
   const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchPets();
-    setRefreshing(false);
+    setRefreshing(true); // Activamos el refresco
+    await fetchPets(); // Volver a obtener los datos
+    setRefreshing(false); // Desactivamos el refresco una vez que los datos se hayan cargado
   };
 
+  // Si los datos están cargando, mostramos un indicador de carga
+  if (loading && !refreshing) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#3bbba4" />
+      </View>
+    );
+  }
+
+  // Función que maneja el clic en un pet para navegar a la pantalla de detalles
   const handlePetClick = (petId) => {
-    navigation.navigate("PetDetail", { petId });
+    navigation.navigate("PetDetail", { petId }); // Navegar a PetDetailScreen pasando el petId
   };
 
+  // Renderizar cada elemento de la lista de mascotas
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handlePetClick(item._id)}
@@ -70,29 +86,17 @@ const PetScreen = () => {
     </TouchableOpacity>
   );
 
-  if (loading && !refreshing) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3bbba4" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <FlatList
-        data={pets}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        ListEmptyComponent={
-          <Text style={{ textAlign: "center", marginTop: 20 }}>
-            No pets found.
-          </Text>
-        }
+        data={pets} // Lista de mascotas
+        renderItem={renderItem} // Función para renderizar cada mascota
+        keyExtractor={(item) => item._id} // Usamos el ID de la mascota como clave
+        refreshing={refreshing} // Indica si está en proceso de refresco
+        onRefresh={handleRefresh} // Función que se ejecuta cuando se hace swipe-up
       />
 
+      {/* Floating Action Button */}
       <FAB
         style={styles.fab}
         icon="plus"
@@ -121,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: 8, // Opcional, para bordes redondeados
   },
   petImage: {
     width: 50,
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 16,
     right: 16,
-    backgroundColor: "#3bbba4",
+    backgroundColor: "#3bbba4", // Puedes personalizar el color aquí
   },
 });
 

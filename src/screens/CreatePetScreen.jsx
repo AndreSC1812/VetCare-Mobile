@@ -15,62 +15,75 @@ const CreatePetScreen = ({ navigation }) => {
   const [petName, setPetName] = useState("");
   const [petSpecies, setPetSpecies] = useState("");
   const [petAge, setPetAge] = useState("");
-  const [petChipNumber, setPetChipNumber] = useState("");
-  const [petWeight, setPetWeight] = useState("");
+  const [petChipNumber, setPetChipNumber] = useState(""); // Nuevo campo para chipNumber
+  const [petWeight, setPetWeight] = useState(""); // Nuevo campo para peso
   const [loading, setLoading] = useState(false);
 
   const createPet = async () => {
+    // Validación para asegurarse de que todos los campos estén completos
     if (!petName || !petSpecies || !petAge || !petChipNumber || !petWeight) {
       Alert.alert(
-        "Incomplete fields",
-        "Please fill in all the fields."
+        "Campos incompletos",
+        "Por favor, completa todos los campos."
       );
       return;
     }
 
+    // Validación para asegurarse de que la edad es un número válido
     const petAgeInt = parseInt(petAge, 10);
     if (isNaN(petAgeInt) || petAgeInt <= 0) {
-      Alert.alert("Invalid age", "Please enter a valid age for the pet.");
+      Alert.alert(
+        "Edad inválida",
+        "Por favor, ingresa una edad válida para la mascota."
+      );
       return;
     }
 
-    const petWeightFloat = parseFloat(petWeight);
-    if (isNaN(petWeightFloat) || petWeightFloat <= 0) {
-      Alert.alert("Invalid weight", "Please enter a valid weight for the pet.");
+    // Validación para asegurarse de que el peso es un número válido
+    const petWeightInt = parseFloat(petWeight);
+    if (isNaN(petWeightInt) || petWeightInt <= 0) {
+      Alert.alert(
+        "Peso inválido",
+        "Por favor, ingresa un peso válido para la mascota."
+      );
       return;
     }
 
     setLoading(true);
     try {
+      // Obtener el token de autenticación
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert("Error", "Token missing. Please log in again.");
+        Alert.alert("Error", "Token faltante. Inicia sesión nuevamente.");
         return;
       }
 
+      // Enviar la solicitud para crear la mascota
       const response = await axios.post(
-        `${API_URL}/api/pets`,
+        `${API_URL}/api/pets`, // Endpoint para crear la mascota
         {
           name: petName,
           species: petSpecies,
-          age: petAgeInt,
-          chipNumber: petChipNumber,
-          weight: petWeightFloat,
+          age: petAgeInt, // Enviar petAge como número
+          chipNumber: petChipNumber, // Enviar chipNumber
+          weight: petWeightInt, // Enviar weight
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      // Verificar si la solicitud fue exitosa
       if (response.status === 201) {
-        Alert.alert("Success", "Pet created successfully.");
+        Alert.alert("Éxito", "Mascota creada exitosamente.");
+        // Navegar a la siguiente pantalla donde se elegirá la imagen de la mascota
         navigation.navigate("UploadPetImage", { petId: response.data.pet._id });
       } else {
-        Alert.alert("Error", "Could not create the pet.");
+        Alert.alert("Error", "No se pudo crear la mascota.");
       }
     } catch (error) {
-      console.error("Error creating pet:", error);
-      Alert.alert("Error", "There was an error creating the pet.");
+      console.error("Error creando la mascota:", error);
+      Alert.alert("Error", "Hubo un error al crear la mascota.");
     } finally {
       setLoading(false);
     }
@@ -78,25 +91,25 @@ const CreatePetScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add a Pet</Text>
+      <Text style={styles.title}>Añadir Mascota</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Name"
+        placeholder="Nombre de la Mascota"
         value={petName}
         onChangeText={setPetName}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Species"
+        placeholder="Especie de la Mascota"
         value={petSpecies}
         onChangeText={setPetSpecies}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Age"
+        placeholder="Edad de la Mascota"
         value={petAge}
         onChangeText={setPetAge}
         keyboardType="numeric"
@@ -104,14 +117,14 @@ const CreatePetScreen = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Chip Number"
+        placeholder="Número de Chip"
         value={petChipNumber}
         onChangeText={setPetChipNumber}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Weight (kg)"
+        placeholder="Peso de la Mascota (kg)"
         value={petWeight}
         onChangeText={setPetWeight}
         keyboardType="numeric"
@@ -123,7 +136,7 @@ const CreatePetScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Creating..." : "Save Pet"}
+          {loading ? "Creando..." : "Guardar Mascota"}
         </Text>
       </TouchableOpacity>
     </View>

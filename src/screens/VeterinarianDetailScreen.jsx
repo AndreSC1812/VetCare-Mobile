@@ -23,7 +23,7 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
         const data = await getVeterinarianById(vetId);
         setVeterinarian(data);
       } catch (error) {
-        console.error("Error fetching veterinarian details:", error);
+        console.error("Error al obtener los detalles del veterinario:", error);
       } finally {
         setLoading(false);
       }
@@ -32,15 +32,15 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
     fetchVeterinarian();
   }, [vetId]);
 
-  // Function to call the veterinarian
+  // Función para llamar al veterinario
   const handleCall = () => {
     if (!veterinarian.phone) {
-      Alert.alert("Error", "No phone number available.");
+      Alert.alert("Error", "No hay un número de teléfono disponible.");
       return;
     }
     const phoneNumber = `tel:${veterinarian.phone}`;
     Linking.openURL(phoneNumber).catch(() =>
-      Alert.alert("Error", "Unable to open the phone app.")
+      Alert.alert("Error", "No se pudo abrir la aplicación de llamadas.")
     );
   };
 
@@ -56,7 +56,7 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
-          No details found for this veterinarian.
+          No se encontraron detalles para este veterinario.
         </Text>
       </View>
     );
@@ -70,10 +70,10 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
       />
       <Text style={styles.fullname}>{veterinarian.fullname}</Text>
       <Text style={styles.specialization}>
-        Specialization: {veterinarian.specialization || "Not specified"}
+        Especialización: {veterinarian.specialization || "No especificada"}
       </Text>
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>Years of Experience:</Text>
+        <Text style={styles.infoTitle}>Años de experiencia:</Text>
         <Text style={styles.infoText}>
           {veterinarian.yearsOfExperience || "N/A"}
         </Text>
@@ -81,23 +81,26 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
         <Text style={styles.infoTitle}>Email:</Text>
         <Text style={styles.infoText}>{veterinarian.email}</Text>
 
-        <Text style={styles.infoTitle}>Phone:</Text>
+        <Text style={styles.infoTitle}>Teléfono:</Text>
         <Text style={styles.infoText}>{veterinarian.phone}</Text>
 
-        <Text style={styles.infoTitle}>Clinic Address:</Text>
+        <Text style={styles.infoTitle}>Dirección de la clínica:</Text>
         <Text style={styles.infoText}>
-          {veterinarian.clinicAddress || "Not specified"}
+          {veterinarian.clinicAddress || "No especificada"}
         </Text>
-
-        <Text style={styles.infoTitle}>Working Hours (Mon-Fri):</Text>
+        {/* Mostrar el horario de atención */}
+        <Text style={styles.infoTitle}>
+          Horario de Atención (Lunes a Viernes):
+        </Text>
         <Text style={styles.infoText}>
           {veterinarian.startTime && veterinarian.endTime
             ? `${veterinarian.startTime} - ${veterinarian.endTime}`
-            : "Not specified"}
+            : "No especificado"}
         </Text>
       </View>
 
       <View style={styles.buttonContainer}>
+        {/* Botón para pedir cita */}
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
@@ -108,11 +111,11 @@ const VeterinarianDetailScreen = ({ route, navigation }) => {
             })
           }
         >
-          <Text style={styles.buttonText}>Book Appointment</Text>
+          <Text style={styles.buttonText}>Pedir Cita</Text>
         </TouchableOpacity>
-
+        {/* Botón para llamar */}
         <TouchableOpacity style={styles.buttonCall} onPress={handleCall}>
-          <Text style={styles.buttonText}>Call</Text>
+          <Text style={styles.buttonText}>Llamar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

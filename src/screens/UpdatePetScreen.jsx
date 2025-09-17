@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -14,7 +13,7 @@ import { getPetById } from "../api/pets";
 import { API_URL } from "@env";
 
 const UpdatePetScreen = ({ route, navigation }) => {
-  const { petId } = route.params; // Get petId from route parameters
+  const { petId } = route.params; // Obtenemos el petId desde los parámetros de la ruta
   const [petName, setPetName] = useState("");
   const [petSpecies, setPetSpecies] = useState("");
   const [petAge, setPetAge] = useState("");
@@ -22,81 +21,96 @@ const UpdatePetScreen = ({ route, navigation }) => {
   const [petWeight, setPetWeight] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Load pet details
+  // Función para cargar los detalles de la mascota
   const loadPetData = async () => {
     try {
       setLoading(true);
-      const pet = await getPetById(petId); // Fetch pet details using petId
+      const pet = await getPetById(petId); // Obtener los detalles de la mascota usando el petId
       setPetName(pet.name);
       setPetSpecies(pet.species);
-      setPetAge(pet.age.toString()); // Convert age to string
+      setPetAge(pet.age.toString()); // Asegurarnos de que la edad esté en formato texto
       setPetChipNumber(pet.chipNumber);
-      setPetWeight(pet.weight.toString()); // Convert weight to string
+      setPetWeight(pet.weight.toString()); // Asegurarnos de que el peso esté en formato texto
     } catch (error) {
-      console.error("Error loading pet details:", error);
-      Alert.alert("Error", "Unable to load pet details.");
+      console.error("Error cargando los detalles de la mascota:", error);
+      Alert.alert("Error", "No se pudo cargar los detalles de la mascota.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPetData(); // Call function on component mount
+    loadPetData(); // Llamamos a la función cuando el componente se monta
   }, [petId]);
 
-  // Update pet data
+  // Función para actualizar los datos de la mascota
   const updatePetData = async () => {
-    // Validate all fields are filled
+    // Validación para asegurarse de que todos los campos estén completos
     if (!petName || !petSpecies || !petAge || !petChipNumber || !petWeight) {
-      Alert.alert("Incomplete Fields", "Please fill out all fields.");
+      Alert.alert(
+        "Campos incompletos",
+        "Por favor, completa todos los campos."
+      );
       return;
     }
 
-    // Validate age
+    // Validación para asegurarse de que la edad es un número válido
     const petAgeInt = parseInt(petAge, 10);
     if (isNaN(petAgeInt) || petAgeInt <= 0) {
-      Alert.alert("Invalid Age", "Please enter a valid age for the pet.");
+      Alert.alert(
+        "Edad inválida",
+        "Por favor, ingresa una edad válida para la mascota."
+      );
       return;
     }
 
-    // Validate weight
+    // Validación para asegurarse de que el peso es un número válido
     const petWeightInt = parseFloat(petWeight);
     if (isNaN(petWeightInt) || petWeightInt <= 0) {
-      Alert.alert("Invalid Weight", "Please enter a valid weight for the pet.");
+      Alert.alert(
+        "Peso inválido",
+        "Por favor, ingresa un peso válido para la mascota."
+      );
       return;
     }
 
     setLoading(true);
     try {
+      // Obtener el token de autenticación
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert("Error", "Token missing. Please log in again.");
         return;
       }
 
+      // Enviar la solicitud para actualizar la mascota
       const response = await axios.put(
-        `${API_URL}/api/pets/${petId}`, // Endpoint to update pet
+        `${API_URL}/api/pets/${petId}`, // Endpoint para actualizar la mascota
         {
           name: petName,
           species: petSpecies,
-          age: petAgeInt,
-          chipNumber: petChipNumber,
-          weight: petWeightInt,
+          age: petAgeInt, // Enviar petAge como número
+          chipNumber: petChipNumber, // Enviar chipNumber
+          weight: petWeightInt, // Enviar weight
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      // Verificar si la solicitud fue exitosa
       if (response.status === 200) {
-        Alert.alert("Success", "Pet data updated successfully.");
-        navigation.goBack(); // Go back to previous screen
+        Alert.alert("Éxito", "Datos de la mascota actualizados exitosamente.");
+        navigation.goBack(); // Regresar a la pantalla anterior
       } else {
-        Alert.alert("Error", "Unable to update pet data.");
+        Alert.alert("Error", "No se pudo actualizar los datos de la mascota.");
       }
     } catch (error) {
-      console.error("Error updating pet data:", error);
-      Alert.alert("Error", "There was an error updating the pet data.");
+      console.error("Error actualizando los datos de la mascota:", error);
+      Alert.alert(
+        "Error",
+        "Hubo un error al actualizar los datos de la mascota."
+      );
     } finally {
       setLoading(false);
     }
@@ -104,25 +118,25 @@ const UpdatePetScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Update Pet Details</Text>
+      <Text style={styles.title}>Actualizar Datos de la Mascota</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Name"
+        placeholder="Nombre de la Mascota"
         value={petName}
         onChangeText={setPetName}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Species"
+        placeholder="Especie de la Mascota"
         value={petSpecies}
         onChangeText={setPetSpecies}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Age"
+        placeholder="Edad de la Mascota"
         value={petAge}
         onChangeText={setPetAge}
         keyboardType="numeric"
@@ -130,14 +144,14 @@ const UpdatePetScreen = ({ route, navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Chip Number"
+        placeholder="Número de Chip"
         value={petChipNumber}
         onChangeText={setPetChipNumber}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Pet Weight (kg)"
+        placeholder="Peso de la Mascota (kg)"
         value={petWeight}
         onChangeText={setPetWeight}
         keyboardType="numeric"
@@ -149,7 +163,7 @@ const UpdatePetScreen = ({ route, navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Updating..." : "Update Pet"}
+          {loading ? "Actualizando..." : "Actualizar Mascota"}
         </Text>
       </TouchableOpacity>
     </View>

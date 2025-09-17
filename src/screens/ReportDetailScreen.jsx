@@ -6,27 +6,27 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { getReportById } from "../api/reports"; // Make sure you have the API to get a report by ID
+import { getReportById } from "../api/reports"; // Asegúrate de tener la API para obtener un informe por ID
 
 const ReportDetailScreen = ({ route }) => {
-  const { reportId } = route.params; // Get reportId from route parameters
-  const [report, setReport] = useState(null); // State for the report
-  const [loading, setLoading] = useState(true); // Loading indicator
+  const { reportId } = route.params; // Obtenemos el reportId desde los parámetros de la ruta
+  const [report, setReport] = useState(null); // Estado para el informe
+  const [loading, setLoading] = useState(true); // Indicador de carga
 
   useEffect(() => {
     const fetchReportDetails = async () => {
       try {
-        setLoading(true); // Activate loading indicator
-        const response = await getReportById(reportId); // Fetch full report using API
-        setReport(response.data.report); // Save the report
+        setLoading(true); // Activamos el indicador de carga
+        const response = await getReportById(reportId); // Obtenemos el informe completo usando la API
+        setReport(response.data.report); // Guardamos el informe
       } catch (error) {
-        console.error("Error fetching report:", error);
+        console.error("Error al obtener el informe:", error);
       } finally {
-        setLoading(false); // Stop loading state
+        setLoading(false); // Terminamos el estado de carga
       }
     };
 
-    fetchReportDetails(); // Call the function on component mount
+    fetchReportDetails(); // Llamamos la función cuando se monta la pantalla
   }, [reportId]);
 
   if (loading) {
@@ -40,55 +40,55 @@ const ReportDetailScreen = ({ route }) => {
   if (!report) {
     return (
       <View style={styles.container}>
-        <Text>Unable to load the report.</Text>
+        <Text>No se pudo cargar el informe.</Text>
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Report Details</Text>
+      <Text style={styles.title}>Detalles del Informe</Text>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Owner Name:</Text>
+        <Text style={styles.sectionTitle}>Nombre del dueño:</Text>
         <Text style={styles.cardText}>{report.ownerName}</Text>
 
-        <Text style={styles.sectionTitle}>Owner Phone:</Text>
+        <Text style={styles.sectionTitle}>Teléfono del dueño:</Text>
         <Text style={styles.cardText}>{report.ownerPhone}</Text>
 
-        <Text style={styles.sectionTitle}>Owner Email:</Text>
+        <Text style={styles.sectionTitle}>Email del dueño:</Text>
         <Text style={styles.cardText}>{report.ownerEmail}</Text>
 
-        <Text style={styles.sectionTitle}>Pet Name:</Text>
+        <Text style={styles.sectionTitle}>Nombre de la Mascota:</Text>
         <Text style={styles.cardText}>{report.petName}</Text>
 
-        <Text style={styles.sectionTitle}>Chip Number:</Text>
+        <Text style={styles.sectionTitle}>Número de Chip:</Text>
         <Text style={styles.cardText}>{report.chipNumber}</Text>
 
-        <Text style={styles.sectionTitle}>Species:</Text>
+        <Text style={styles.sectionTitle}>Especie:</Text>
         <Text style={styles.cardText}>{report.species}</Text>
 
-        <Text style={styles.sectionTitle}>Weight:</Text>
+        <Text style={styles.sectionTitle}>Peso:</Text>
         <Text style={styles.cardText}>{report.weight}</Text>
 
-        <Text style={styles.sectionTitle}>Consultation Date:</Text>
+        <Text style={styles.sectionTitle}>Fecha de Consulta:</Text>
         <Text style={styles.cardText}>
           {new Date(report.consultationDate).toLocaleDateString()}
         </Text>
 
-        <Text style={styles.sectionTitle}>Reason for Consultation:</Text>
+        <Text style={styles.sectionTitle}>Motivo de Consulta:</Text>
         <Text style={styles.cardText}>{report.consultationReason}</Text>
 
-        <Text style={styles.sectionTitle}>Clinical Signs:</Text>
+        <Text style={styles.sectionTitle}>Signos Clínicos:</Text>
         <Text style={styles.cardText}>{report.clinicalSigns}</Text>
 
-        <Text style={styles.sectionTitle}>Diagnosis:</Text>
+        <Text style={styles.sectionTitle}>Diagnóstico:</Text>
         <Text style={styles.cardText}>{report.diagnosis}</Text>
 
-        <Text style={styles.sectionTitle}>Treatment:</Text>
+        <Text style={styles.sectionTitle}>Tratamiento:</Text>
         <Text style={styles.cardText}>{report.treatment}</Text>
 
-        <Text style={styles.sectionTitle}>Recommendations:</Text>
+        <Text style={styles.sectionTitle}>Recomendaciones:</Text>
         <Text style={styles.cardText}>{report.recommendations}</Text>
       </View>
     </ScrollView>

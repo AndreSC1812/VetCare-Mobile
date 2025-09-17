@@ -13,32 +13,36 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {
-  const navigation = useNavigation();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation(); // Para navegación
+  const [profile, setProfile] = useState(null); // Estado para el perfil
+  const [loading, setLoading] = useState(true); // Indicador de carga
 
+  // Función para obtener el perfil del usuario
   const fetchProfile = async () => {
     try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      if (!token) throw new Error("User not authenticated");
+      setLoading(true); // Mostrar el indicador de carga mientras se hace la solicitud
+      const token = await AsyncStorage.getItem("token"); // Obtener el token del almacenamiento local
+      if (!token) throw new Error("Usuario no autenticado");
 
-      const { data } = await getProfile(token);
-      setProfile(data.user);
+      const { data } = await getProfile(token); // Hacer solicitud al backend
+      setProfile(data.user); // Guardar los datos del perfil en el estado
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error al obtener el perfil:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Detener el indicador de carga
     }
   };
 
+  // Cargar el perfil al montar y cuando la pantalla reciba el foco
   useEffect(() => {
-    fetchProfile();
+    fetchProfile(); // Cargar el perfil inicialmente
 
+    // Agregar un listener para cuando la pantalla reciba el foco
     const unsubscribe = navigation.addListener("focus", () => {
-      fetchProfile();
+      fetchProfile(); // Recargar el perfil al recibir el foco
     });
 
+    // Limpiar el listener cuando el componente se desmonte
     return unsubscribe;
   }, [navigation]);
 
@@ -53,49 +57,54 @@ const ProfileScreen = () => {
   if (!profile) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Unable to load profile.</Text>
+        <Text style={styles.errorText}>No se pudo cargar el perfil</Text>
       </View>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Profile image */}
+      {/* Imagen de perfil */}
       <Image
         source={{ uri: profile.profileImage }}
         style={styles.profileImage}
       />
 
-      {/* Name and username */}
-      <Text style={styles.fullname}>{profile.fullname || "Unknown Name"}</Text>
+      {/* Nombre y username */}
+      <Text style={styles.fullname}>
+        {profile.fullname || "Nombre desconocido"}
+      </Text>
       <Text style={styles.username}>{`@${profile.username}`}</Text>
 
-      {/* Personal info */}
+      {/* Datos personales */}
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>Email</Text>
+        <Text style={styles.infoTitle}>Correo Electrónico</Text>
         <Text style={styles.infoText}>{profile.email}</Text>
 
-        <Text style={styles.infoTitle}>Phone</Text>
-        <Text style={styles.infoText}>{profile.phone || "Not provided"}</Text>
+        <Text style={styles.infoTitle}>Teléfono</Text>
+        <Text style={styles.infoText}>
+          {profile.phone || "No proporcionado"}
+        </Text>
 
-        <Text style={styles.infoTitle}>Address</Text>
-        <Text style={styles.infoText}>{profile.address || "Not provided"}</Text>
+        <Text style={styles.infoTitle}>Dirección</Text>
+        <Text style={styles.infoText}>
+          {profile.address || "No proporcionada"}
+        </Text>
       </View>
 
-      {/* Buttons for editing profile */}
+      {/* Botones para cambiar perfil y datos */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("ChangeProfileImageScreen")}
+          onPress={() => navigation.navigate("ChangeProfileImageScreen")} // Aquí estamos navegando a la pantalla de cambiar foto
         >
-          <Text style={styles.buttonText}>Change Photo</Text>
+          <Text style={styles.buttonText}>Cambiar Foto</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("EditClientData")}
         >
-          <Text style={styles.buttonText}>Edit Info</Text>
+          <Text style={styles.buttonText}>Cambiar Datos</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -142,11 +151,12 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     width: "100%",
+    paddingHorizontal: 10,
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 20,
-    elevation: 3,
-    shadowColor: "#000",
+    elevation: 3, // Sombra en Android
+    shadowColor: "#000", // Sombra en iOS
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

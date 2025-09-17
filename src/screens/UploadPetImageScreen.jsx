@@ -16,14 +16,14 @@ const UploadPetImageScreen = ({ route, navigation }) => {
   const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const { petId } = route.params; // Get the created pet's ID
+  const { petId } = route.params; // Obtén el ID de la mascota creada
 
   const pickImage = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Gallery access is needed.");
+    if (permissionResult.granted === false) {
+      Alert.alert("Permiso requerido", "Se necesita acceso a la galería.");
       return;
     }
 
@@ -34,8 +34,8 @@ const UploadPetImageScreen = ({ route, navigation }) => {
     });
 
     if (!result.canceled) {
-      const selectedImage = result.assets[0]; // Access the first asset
-      setImageUri(selectedImage.uri); // Save only the selected image URI
+      const selectedImage = result.assets[0]; // Accedemos al primer asset
+      setImageUri(selectedImage.uri); // Guardamos solo la URI de la imagen seleccionada
     }
   };
 
@@ -45,7 +45,7 @@ const UploadPetImageScreen = ({ route, navigation }) => {
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Establecemos el estado de carga a true
 
     try {
       const token = await AsyncStorage.getItem("token");
@@ -55,18 +55,18 @@ const UploadPetImageScreen = ({ route, navigation }) => {
         return;
       }
 
-      // Get the file extension
-      const fileExtension = imageUri.split(".").pop();
+      // Aquí obtenemos el tipo MIME del archivo
+      const fileExtension = imageUri.split(".").pop(); // Obtener la extensión del archivo
 
       const formData = new FormData();
       formData.append("petImage", {
         uri: imageUri,
-        type: `image/${fileExtension}`, // Set correct MIME type
-        name: `pet_image_${Date.now()}.${fileExtension}`, // Name with extension
+        type: `image/${fileExtension}`, // Asignar el tipo correcto según la extensión
+        name: `pet_image_${Date.now()}.${fileExtension}`, // Ajustar el nombre del archivo con la extensión
       });
 
       const response = await axios.post(
-        `${API_URL}/api/pets/${petId}/upload`,
+        `${API_URL}/api/pets/${petId}/upload`, // Verifica que esta IP sea accesible
         formData,
         {
           headers: {
@@ -77,34 +77,37 @@ const UploadPetImageScreen = ({ route, navigation }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Success", "Pet image uploaded.");
+        Alert.alert("Éxito", "Imagen de la mascota subida.");
         navigation.navigate("HomeTabs");
       } else {
-        Alert.alert("Error", "There was an issue uploading the image.");
+        Alert.alert("Error", "Hubo un problema al subir la imagen.");
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Error subiendo la imagen:", error);
       if (error.response) {
-        console.error("Server response error:", error.response);
+        // Si el servidor responde con un error (código de estado 4xx, 5xx)
+        console.error("Error en la respuesta del servidor:", error.response);
         Alert.alert(
-          "Server Error",
-          `Code: ${error.response.status} - ${error.response.statusText}`
+          "Error en la respuesta del servidor",
+          `Código: ${error.response.status} - ${error.response.statusText}`
         );
       } else if (error.request) {
-        console.error("Request error:", error.request);
-        Alert.alert("Network Error", "No response received from server.");
+        // Si la solicitud fue realizada pero no hubo respuesta
+        console.error("Error en la solicitud:", error.request);
+        Alert.alert("Error de red", "No se recibió respuesta del servidor.");
       } else {
-        console.error("Unknown error:", error.message);
-        Alert.alert("Unknown Error", error.message);
+        // Si ocurre un error al configurar la solicitud
+        console.error("Error desconocido:", error.message);
+        Alert.alert("Error desconocido", error.message);
       }
     } finally {
-      setLoading(false);
+      setLoading(false); // Desactivamos el estado de carga al final
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Upload Pet Image</Text>
+      <Text style={styles.title}>Subir Imagen de la Mascota</Text>
 
       <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
         {imageUri ? (
@@ -120,7 +123,7 @@ const UploadPetImageScreen = ({ route, navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Uploading..." : "Upload Image"}
+          {loading ? "Subiendo..." : "Subir Imagen"}
         </Text>
       </TouchableOpacity>
     </View>

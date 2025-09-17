@@ -20,10 +20,11 @@ const EditClientDataScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Cargar datos iniciales del cliente
     const fetchClientData = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        if (!token) throw new Error("User not authenticated");
+        if (!token) throw new Error("Usuario no autenticado");
 
         const response = await axios.get(`${API_URL}/api/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -36,8 +37,8 @@ const EditClientDataScreen = ({ navigation }) => {
         setPhone(client.phone || "");
         setAddress(client.address || "");
       } catch (error) {
-        console.error("Error fetching client data:", error);
-        Alert.alert("Error", "Could not load client data.");
+        console.error("Error al obtener datos del cliente:", error);
+        Alert.alert("Error", "No se pudo cargar los datos del cliente.");
       }
     };
 
@@ -47,8 +48,8 @@ const EditClientDataScreen = ({ navigation }) => {
   const updateClientData = async () => {
     if (!fullname || !email) {
       Alert.alert(
-        "Required fields",
-        "Please fill in the required fields."
+        "Campos obligatorios",
+        "Por favor, llena los campos requeridos."
       );
       return;
     }
@@ -57,7 +58,7 @@ const EditClientDataScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert("Error", "Token missing. Please log in again.");
+        Alert.alert("Error", "Token faltante. Inicia sesión nuevamente.");
         return;
       }
 
@@ -70,14 +71,14 @@ const EditClientDataScreen = ({ navigation }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Success", "Client data updated successfully.");
-        navigation.goBack();
+        Alert.alert("Éxito", "Datos actualizados exitosamente.");
+        navigation.goBack(); // Regresa a la pantalla anterior
       } else {
-        Alert.alert("Error", "Could not update client data.");
+        Alert.alert("Error", "No se pudieron actualizar los datos.");
       }
     } catch (error) {
-      console.error("Error updating client data:", error);
-      Alert.alert("Error", "There was an error updating the data.");
+      console.error("Error actualizando datos del cliente:", error);
+      Alert.alert("Error", "Hubo un error al actualizar los datos.");
     } finally {
       setLoading(false);
     }
@@ -85,25 +86,25 @@ const EditClientDataScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Client Data</Text>
+      <Text style={styles.title}>Editar Datos del Cliente</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Full Name"
+        placeholder="Nombre Completo"
         value={fullname}
         onChangeText={setFullname}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="Nombre de Usuario"
         value={username}
         onChangeText={setUsername}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Correo Electrónico"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -111,7 +112,7 @@ const EditClientDataScreen = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Phone"
+        placeholder="Teléfono"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
@@ -119,7 +120,7 @@ const EditClientDataScreen = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Address"
+        placeholder="Dirección"
         value={address}
         onChangeText={setAddress}
       />
@@ -130,7 +131,7 @@ const EditClientDataScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Saving..." : "Save Changes"}
+          {loading ? "Guardando..." : "Guardar Cambios"}
         </Text>
       </TouchableOpacity>
     </View>
