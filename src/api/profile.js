@@ -2,7 +2,7 @@
 import axios from "axios";
 import { API_URL } from "@env";
 
-// Cargar imagen de perfil
+// Upload profile image
 export const uploadProfileImage = (token, formData) => {
   return axios.post(`${API_URL}/api/profile/upload`, formData, {
     headers: {
@@ -12,7 +12,7 @@ export const uploadProfileImage = (token, formData) => {
   });
 };
 
-// Actualizar datos del perfil
+// Update profile data
 export const updateProfileData = (token, data) => {
   return axios.put(`${API_URL}/api/profile/update`, data, {
     headers: {

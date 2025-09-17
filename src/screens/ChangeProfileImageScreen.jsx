@@ -13,15 +13,16 @@ import axios from "axios";
 import { API_URL } from "@env";
 
 const ChangeProfileImageScreen = ({ navigation }) => {
-  const [imageUri, setImageUri] = useState(null); // Para guardar la imagen seleccionada
-  const [loading, setLoading] = useState(false); // Para gestionar el estado de carga
+  const [imageUri, setImageUri] = useState(null); // Selected image URI
+  const [loading, setLoading] = useState(false); // Loading state
 
+  // Function to pick an image from the gallery
   const pickImage = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
-      Alert.alert("Permiso requerido", "Se necesita acceso a la galería.");
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Access to the gallery is needed.");
       return;
     }
 
@@ -32,39 +33,38 @@ const ChangeProfileImageScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      const selectedImage = result.assets[0]; // Accedemos al primer asset
-      setImageUri(selectedImage.uri); // Guardamos la URI de la imagen seleccionada
+      const selectedImage = result.assets[0];
+      setImageUri(selectedImage.uri);
     }
   };
 
+  // Function to upload the selected image
   const uploadImage = async () => {
     if (!imageUri) {
       Alert.alert("No image selected", "Please select an image first");
       return;
     }
 
-    setLoading(true); // Establecemos el estado de carga a true
+    setLoading(true);
 
     try {
       const token = await AsyncStorage.getItem("token");
-
       if (!token) {
         Alert.alert("Error", "Token missing. Please log in again.");
         return;
       }
 
-      // Aquí obtenemos el tipo MIME del archivo
-      const fileExtension = imageUri.split(".").pop(); // Obtener la extensión del archivo
+      const fileExtension = imageUri.split(".").pop();
 
       const formData = new FormData();
       formData.append("profileImage", {
         uri: imageUri,
-        type: `image/${fileExtension}`, // Asignar el tipo correcto según la extensión
-        name: `profile_image_${Date.now()}.${fileExtension}`, // Ajustar el nombre del archivo con la extensión
+        type: `image/${fileExtension}`,
+        name: `profile_image_${Date.now()}.${fileExtension}`,
       });
 
       const response = await axios.post(
-        `${API_URL}/api/profile/upload`, // URL del backend para subir la imagen
+        `${API_URL}/api/profile/upload`,
         formData,
         {
           headers: {
@@ -75,22 +75,22 @@ const ChangeProfileImageScreen = ({ navigation }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Éxito", "Imagen de perfil subida correctamente.");
-        navigation.goBack(); // Volver a la pantalla anterior (perfil)
+        Alert.alert("Success", "Profile image uploaded successfully.");
+        navigation.goBack(); // Go back to previous screen
       } else {
-        Alert.alert("Error", "Hubo un problema al subir la imagen.");
+        Alert.alert("Error", "There was a problem uploading the image.");
       }
     } catch (error) {
-      console.error("Error subiendo la imagen:", error);
-      Alert.alert("Error", "Hubo un problema con la carga de la imagen.");
+      console.error("Error uploading image:", error);
+      Alert.alert("Error", "There was an issue uploading the image.");
     } finally {
-      setLoading(false); // Desactivamos el estado de carga al final
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cambiar Imagen de Perfil</Text>
+      <Text style={styles.title}>Change Profile Image</Text>
 
       <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
         {imageUri ? (
@@ -106,7 +106,7 @@ const ChangeProfileImageScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Subiendo..." : "Subir Imagen"}
+          {loading ? "Uploading..." : "Upload Image"}
         </Text>
       </TouchableOpacity>
     </View>

@@ -4,10 +4,11 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import { API_URL } from "@env";
 
 export default function App() {
-  console.log("API_URL:", API_URL);
+  console.log("API_URL:", API_URL); // Logs the API URL from the environment variables
+
   return (
     <>
-      {/* Cambiar el estilo a "dark" para que el texto de la barra de estado sea oscuro */}
+      {/* Set the status bar style to "dark" for dark text */}
       <StatusBar style="dark" translucent={true} />
       <AppNavigator />
     </>

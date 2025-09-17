@@ -9,94 +9,71 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { getPetById, deletePet } from "../api/pets"; // Asegúrate de tener la función deletePet para eliminar una mascota
+import { getPetById } from "../api/pets"; // Make sure getPetById exists
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_URL } from "@env";
 
 const PetDetailScreen = ({ route, navigation }) => {
-  const { petId } = route.params; // Obtenemos el petId desde los parámetros de la ruta
-  const [pet, setPet] = useState(null); // Estado para los detalles de la mascota
-  const [loading, setLoading] = useState(true); // Indicador de carga
+  const { petId } = route.params;
+  const [pet, setPet] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Función para obtener los detalles de la mascota
   const fetchPetDetails = async () => {
     try {
-      setLoading(true); // Activamos el indicador de carga
-      const data = await getPetById(petId); // Llamamos a la API con el petId
-      setPet(data); // Guardamos los datos de la mascota
+      setLoading(true);
+      const data = await getPetById(petId);
+      setPet(data);
     } catch (error) {
-      console.error("Error al obtener los detalles de la mascota:", error);
+      console.error("Error fetching pet details:", error);
     } finally {
-      setLoading(false); // Terminamos el estado de carga
+      setLoading(false);
     }
   };
 
-  // Usamos el hook useEffect para cargar los datos al montar la pantalla
   useEffect(() => {
-    console.log("Pet ID:", petId);
-    fetchPetDetails(); // Llamamos a la función cuando el componente se monta
-
-    // Agregar listener para cuando la pantalla reciba el foco
+    fetchPetDetails();
     const unsubscribe = navigation.addListener("focus", () => {
-      fetchPetDetails(); // Recargar los detalles de la mascota cuando la pantalla reciba el foco
+      fetchPetDetails();
     });
-
-    // Limpiar el listener cuando el componente se desmonte
     return unsubscribe;
   }, [navigation, petId]);
 
-  // Función para eliminar la mascota
   const handleDeletePet = async () => {
-    try {
-      // Usamos Alert.alert para crear una confirmación personalizada
-      Alert.alert(
-        "Confirmar eliminación",
-        "¿Estás seguro de que deseas eliminar esta mascota?",
-        [
-          {
-            text: "Cancelar", // Acción para cancelar
-            onPress: () => console.log("Cancelado"),
-            style: "cancel",
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this pet?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancelled"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            const token = await AsyncStorage.getItem("token");
+            if (!token) {
+              Alert.alert("Error", "You are not authenticated. Please log in.");
+              return;
+            }
+            try {
+              await axios.delete(`${API_URL}/api/pets/${petId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              Alert.alert("Success", "The pet has been deleted.");
+              navigation.goBack();
+            } catch (error) {
+              console.error("Error deleting pet:", error);
+              Alert.alert("Error", "There was a problem deleting the pet.");
+            }
           },
-          {
-            text: "Eliminar", // Acción para eliminar
-            onPress: async () => {
-              // Si el usuario confirma, procedemos a eliminar la mascota
-              const token = await AsyncStorage.getItem("token"); // Obtener el token de autenticación
-              if (!token) {
-                Alert.alert("Error", "No estás autenticado. Inicia sesión.");
-                return;
-              }
-
-              try {
-                // Llamada a la API para eliminar la mascota
-                await axios.delete(`${API_URL}/api/pets/${petId}`, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-                Alert.alert("Éxito", "La mascota ha sido eliminada.");
-                navigation.goBack(); // Volver a la pantalla anterior
-              } catch (error) {
-                console.error("Error al eliminar la mascota:", error);
-                Alert.alert(
-                  "Error",
-                  "Hubo un problema al eliminar la mascota."
-                );
-              }
-            },
-          },
-        ],
-        { cancelable: false } // Deshabilitar el toque fuera para cerrar la alerta
-      );
-    } catch (error) {
-      console.error("Error al intentar eliminar la mascota:", error);
-      Alert.alert("Error", "Hubo un problema al intentar eliminar la mascota.");
-    }
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
-  // Si los detalles de la mascota están cargando, mostramos un indicador de carga
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -105,12 +82,11 @@ const PetDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  // Si no se encontraron los detalles de la mascota, mostramos un mensaje de error
   if (!pet) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
-          No se pudo cargar los detalles de la mascota
+          Unable to load pet details
         </Text>
       </View>
     );
@@ -118,54 +94,46 @@ const PetDetailScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Imagen de la mascota */}
       <Image source={{ uri: pet.image }} style={styles.petImage} />
-
-      {/* Nombre de la mascota */}
       <Text style={styles.petName}>{pet.name}</Text>
       <Text style={styles.petSpecies}>{pet.species}</Text>
 
-      {/* Datos adicionales */}
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>Edad:</Text>
-        <Text style={styles.infoText}>{pet.age} años</Text>
+        <Text style={styles.infoTitle}>Age:</Text>
+        <Text style={styles.infoText}>{pet.age} years</Text>
 
-        <Text style={styles.infoTitle}>Número de Chip:</Text>
+        <Text style={styles.infoTitle}>Chip Number:</Text>
         <Text style={styles.infoText}>{pet.chipNumber}</Text>
 
-        <Text style={styles.infoTitle}>Peso:</Text>
+        <Text style={styles.infoTitle}>Weight:</Text>
         <Text style={styles.infoText}>{pet.weight} kg</Text>
       </View>
 
-      {/* Botones para cambiar foto y cambiar datos */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("UploadPetImage", { petId })} // Pasar el petId
+          onPress={() => navigation.navigate("UploadPetImage", { petId })}
         >
-          <Text style={styles.buttonText}>Cambiar Foto</Text>
+          <Text style={styles.buttonText}>Change Photo</Text>
         </TouchableOpacity>
 
-        {/* Navegar a la pantalla de edición de datos */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("UpdatePet", { petId })}
         >
-          <Text style={styles.buttonText}>Cambiar Datos</Text>
+          <Text style={styles.buttonText}>Edit Details</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Botón para ver informes, con el mismo estilo que el botón de eliminar */}
       <TouchableOpacity
         style={styles.reportButton}
-        onPress={() => navigation.navigate("PetReportsScreen", { petId })} // Aquí se navega pasando el petId
+        onPress={() => navigation.navigate("PetReportsScreen", { petId })}
       >
-        <Text style={styles.buttonText}>Ver Informes</Text>
+        <Text style={styles.buttonText}>View Reports</Text>
       </TouchableOpacity>
 
-      {/* Botón para eliminar la mascota, colocado debajo de "Ver Informes" */}
       <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePet}>
-        <Text style={styles.buttonText}>Eliminar Mascota</Text>
+        <Text style={styles.buttonText}>Delete Pet</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -197,7 +165,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     marginBottom: 20,
-    marginTop: 40, // Añadido margen superior para dar espacio
+    marginTop: 40,
   },
   petName: {
     fontSize: 24,
@@ -217,8 +185,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 20,
-    elevation: 3, // Sombra en Android
-    shadowColor: "#000", // Sombra en iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -250,20 +218,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   reportButton: {
-    backgroundColor: "#3bbba4", // Color igual a los otros botones
-    marginTop: 20, // Añadir espacio entre los botones
+    backgroundColor: "#3bbba4",
+    marginTop: 20,
     borderRadius: 8,
-    width: "97%", // Aseguramos que ocupe todo el ancho
+    width: "97%",
     alignItems: "center",
-    paddingVertical: 10, // Un poco más de espacio en el botón
+    paddingVertical: 10,
   },
   deleteButton: {
-    backgroundColor: "#ff4d4d", // Color rojo para el botón de eliminar
-    marginTop: 20, // Añadir espacio entre botones
+    backgroundColor: "#ff4d4d",
+    marginTop: 20,
     borderRadius: 8,
-    width: "97%", // Aseguramos que ocupe todo el ancho
+    width: "97%",
     alignItems: "center",
-    paddingVertical: 10, // Un poco más de espacio en el botón
+    paddingVertical: 10,
   },
   buttonText: {
     color: "#fff",

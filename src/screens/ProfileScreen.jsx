@@ -13,36 +13,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {
-  const navigation = useNavigation(); // Para navegación
-  const [profile, setProfile] = useState(null); // Estado para el perfil
-  const [loading, setLoading] = useState(true); // Indicador de carga
+  const navigation = useNavigation();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Función para obtener el perfil del usuario
   const fetchProfile = async () => {
     try {
-      setLoading(true); // Mostrar el indicador de carga mientras se hace la solicitud
-      const token = await AsyncStorage.getItem("token"); // Obtener el token del almacenamiento local
-      if (!token) throw new Error("Usuario no autenticado");
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated");
 
-      const { data } = await getProfile(token); // Hacer solicitud al backend
-      setProfile(data.user); // Guardar los datos del perfil en el estado
+      const { data } = await getProfile(token);
+      setProfile(data.user);
     } catch (error) {
-      console.error("Error al obtener el perfil:", error);
+      console.error("Error fetching profile:", error);
     } finally {
-      setLoading(false); // Detener el indicador de carga
+      setLoading(false);
     }
   };
 
-  // Cargar el perfil al montar y cuando la pantalla reciba el foco
   useEffect(() => {
-    fetchProfile(); // Cargar el perfil inicialmente
+    fetchProfile();
 
-    // Agregar un listener para cuando la pantalla reciba el foco
     const unsubscribe = navigation.addListener("focus", () => {
-      fetchProfile(); // Recargar el perfil al recibir el foco
+      fetchProfile();
     });
 
-    // Limpiar el listener cuando el componente se desmonte
     return unsubscribe;
   }, [navigation]);
 
@@ -57,54 +53,49 @@ const ProfileScreen = () => {
   if (!profile) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No se pudo cargar el perfil</Text>
+        <Text style={styles.errorText}>Unable to load profile.</Text>
       </View>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Imagen de perfil */}
+      {/* Profile image */}
       <Image
         source={{ uri: profile.profileImage }}
         style={styles.profileImage}
       />
 
-      {/* Nombre y username */}
-      <Text style={styles.fullname}>
-        {profile.fullname || "Nombre desconocido"}
-      </Text>
+      {/* Name and username */}
+      <Text style={styles.fullname}>{profile.fullname || "Unknown Name"}</Text>
       <Text style={styles.username}>{`@${profile.username}`}</Text>
 
-      {/* Datos personales */}
+      {/* Personal info */}
       <View style={styles.infoContainer}>
-        <Text style={styles.infoTitle}>Correo Electrónico</Text>
+        <Text style={styles.infoTitle}>Email</Text>
         <Text style={styles.infoText}>{profile.email}</Text>
 
-        <Text style={styles.infoTitle}>Teléfono</Text>
-        <Text style={styles.infoText}>
-          {profile.phone || "No proporcionado"}
-        </Text>
+        <Text style={styles.infoTitle}>Phone</Text>
+        <Text style={styles.infoText}>{profile.phone || "Not provided"}</Text>
 
-        <Text style={styles.infoTitle}>Dirección</Text>
-        <Text style={styles.infoText}>
-          {profile.address || "No proporcionada"}
-        </Text>
+        <Text style={styles.infoTitle}>Address</Text>
+        <Text style={styles.infoText}>{profile.address || "Not provided"}</Text>
       </View>
 
-      {/* Botones para cambiar perfil y datos */}
+      {/* Buttons for editing profile */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("ChangeProfileImageScreen")} // Aquí estamos navegando a la pantalla de cambiar foto
+          onPress={() => navigation.navigate("ChangeProfileImageScreen")}
         >
-          <Text style={styles.buttonText}>Cambiar Foto</Text>
+          <Text style={styles.buttonText}>Change Photo</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("EditClientData")}
         >
-          <Text style={styles.buttonText}>Cambiar Datos</Text>
+          <Text style={styles.buttonText}>Edit Info</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -151,12 +142,11 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     width: "100%",
-    paddingHorizontal: 10,
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 20,
-    elevation: 3, // Sombra en Android
-    shadowColor: "#000", // Sombra en iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

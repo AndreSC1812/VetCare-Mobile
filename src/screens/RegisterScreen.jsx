@@ -7,10 +7,10 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import MySvg from "../../assets/vetcare-logo-verde.svg"; // Asegúrate de que la ruta sea correcta
-import Icon from "react-native-vector-icons/MaterialIcons"; // Importa el ícono de Material Icons
+import MySvg from "../../assets/vetcare-logo-verde.svg"; // Make sure the path is correct
+import Icon from "react-native-vector-icons/MaterialIcons"; // Import Material Icons
 import { registerRequest } from "../api/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Importa AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -24,11 +24,11 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!username || !email || !password || !confirmPassword) {
-      setError("Por favor, completa todos los campos");
+      setError("Please fill in all fields");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("Passwords do not match");
       return;
     }
 
@@ -46,15 +46,15 @@ const RegisterScreen = ({ navigation }) => {
       const response = await registerRequest(client);
 
       if (response.status === 201) {
-        const { token, user } = response.data; // Se espera que el backend devuelva el usuario con su ID
-        await AsyncStorage.setItem("token", token); // Guarda el token
-        await AsyncStorage.setItem("clientId", user.id.toString()); // Guarda el ID del cliente
-        navigation.navigate("CompleteProfile"); // Navegar a la pantalla de completar perfil
+        const { token, user } = response.data; // Expect backend to return user with ID
+        await AsyncStorage.setItem("token", token); // Save token
+        await AsyncStorage.setItem("clientId", user.id.toString()); // Save client ID
+        navigation.navigate("CompleteProfile"); // Navigate to complete profile screen
       } else {
-        setError("Error al registrar, intenta de nuevo");
+        setError("Registration failed, please try again");
       }
     } catch (error) {
-      // Usar mensaje específico del servidor si está disponible
+      // Use server-specific message if available
       if (
         error.response &&
         error.response.data &&
@@ -62,7 +62,7 @@ const RegisterScreen = ({ navigation }) => {
       ) {
         setError(error.response.data.message);
       } else {
-        setError("Error en la conexión, intenta de nuevo");
+        setError("Connection error, please try again");
       }
     } finally {
       setLoading(false);
@@ -72,16 +72,16 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MySvg width={150} height={150} />
-      <Text style={styles.title}>Registrarse</Text>
+      <Text style={styles.title}>Register</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nombre de Usuario"
+        placeholder="Username"
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
-        placeholder="Correo Electrónico"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -89,7 +89,7 @@ const RegisterScreen = ({ navigation }) => {
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.inputPassword}
-          placeholder="Contraseña"
+          placeholder="Password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
@@ -108,7 +108,7 @@ const RegisterScreen = ({ navigation }) => {
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.inputPassword}
-          placeholder="Confirmar Contraseña"
+          placeholder="Confirm Password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry={!showConfirmPassword}
@@ -131,13 +131,13 @@ const RegisterScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Registrando..." : "Registrarse"}
+          {loading ? "Registering..." : "Register"}
         </Text>
       </TouchableOpacity>
       <View style={styles.registerContainer}>
-        <Text>¿Ya tienes cuenta? </Text>
+        <Text>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.registerText}>Inicia sesión aquí</Text>
+          <Text style={styles.registerText}>Login here</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -147,15 +147,15 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F7F7", // Fondo de la pantalla
+    backgroundColor: "#F7F7F7", // Screen background
     alignItems: "center",
-    justifyContent: "center", // Centra verticalmente
-    paddingHorizontal: 20, // Espaciado horizontal
+    justifyContent: "center", // Center vertically
+    paddingHorizontal: 20, // Horizontal spacing
   },
   title: {
     fontSize: 24,
-    marginVertical: 20, // Espaciado vertical
-    color: "#3bbba4", // Color del texto
+    marginVertical: 20, // Vertical spacing
+    color: "#3bbba4", // Text color
     textAlign: "center",
   },
   input: {
@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     borderRadius: 5,
-    width: "100%", // Ancho completo
-    backgroundColor: "white", // Fondo blanco para los inputs
+    width: "100%", // Full width
+    backgroundColor: "white", // White background for inputs
   },
   passwordContainer: {
     flexDirection: "row",
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 15,
-    backgroundColor: "white", // Fondo blanco
+    backgroundColor: "white", // White background
   },
   inputPassword: {
     flex: 1,
@@ -196,10 +196,10 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#3bbba4",
     height: 40,
-    width: "100%", // Ancho completo
-    justifyContent: "center", // Centra el texto verticalmente
-    alignItems: "center", // Centra el texto horizontalmente
-    borderRadius: 5, // Esquinas redondeadas
+    width: "100%", // Full width
+    justifyContent: "center", // Center text vertically
+    alignItems: "center", // Center text horizontally
+    borderRadius: 5, // Rounded corners
     marginBottom: 15,
   },
   buttonText: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   registerText: {
     color: "#3bbba4",
     marginLeft: 5,
-    textDecorationLine: "underline", // Subraya el texto
+    textDecorationLine: "underline", // Underline text
   },
 });
 

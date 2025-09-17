@@ -1,30 +1,30 @@
 // HomeTabs.js
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons"; // Importa los iconos de Ionicons
-import VeterinariansScreen from "../screens/VeterinariansScreen"; // Pantalla de Veterinarios
-import PetsScreen from "../screens/PetsScreen"; // Pantalla de Mascotas
-import ProfileScreen from "../screens/ProfileScreen"; // Pantalla de Perfil
-import AppointmentsScreen from "../screens/AppointmentsScreen"; // Nueva pantalla de Citas
+import { Ionicons } from "@expo/vector-icons"; // Import Ionicons icons
+import VeterinariansScreen from "../screens/VeterinariansScreen"; // Veterinarians screen
+import PetsScreen from "../screens/PetsScreen"; // Pets screen
+import ProfileScreen from "../screens/ProfileScreen"; // Profile screen
+import AppointmentsScreen from "../screens/AppointmentsScreen"; // Appointments screen
 
 const Tab = createBottomTabNavigator();
 
 const HomeTabs = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Veterinarios"
+      initialRouteName="Veterinarians"
       screenOptions={{
-        tabBarActiveTintColor: "#3bbba4", // Color para las pestañas activas
-        tabBarInactiveTintColor: "#777", // Color para las pestañas inactivas
+        tabBarActiveTintColor: "#3bbba4", // Active tab color
+        tabBarInactiveTintColor: "#777", // Inactive tab color
         tabBarStyle: {
-          backgroundColor: "#fff", // Fondo de la barra de pestañas
+          backgroundColor: "#fff", // Tab bar background
           borderTopWidth: 1,
-          borderTopColor: "#eee", // Color de la línea superior
+          borderTopColor: "#eee", // Top border color
         },
       }}
     >
       <Tab.Screen
-        name="Veterinarios"
+        name="Veterinarians"
         component={VeterinariansScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -33,7 +33,7 @@ const HomeTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Mascotas"
+        name="Pets"
         component={PetsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -42,8 +42,8 @@ const HomeTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Citas"
-        component={AppointmentsScreen} // Nueva pantalla de Citas
+        name="Appointments"
+        component={AppointmentsScreen} // Appointments screen
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" size={size} color={color} />
@@ -51,7 +51,7 @@ const HomeTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Perfil"
+        name="Profile"
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ color, size }) => (

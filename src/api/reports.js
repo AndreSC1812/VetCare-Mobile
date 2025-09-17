@@ -1,50 +1,50 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Importar AsyncStorage para acceder al almacenamiento local
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage to access local storage
 import { API_URL } from "@env";
 
-// Obtener los informes de una mascota
+// Get reports of a specific pet
 export const getReportsByPet = async (petId) => {
   try {
-    const token = await AsyncStorage.getItem("token"); // Obtener el token almacenado
+    const token = await AsyncStorage.getItem("token"); // Get stored token
 
     if (!token) {
-      throw new Error("No se encontró el token de autenticación.");
+      throw new Error("Authentication token not found.");
     }
 
     return axios.get(`${API_URL}/api/reports/pet/${petId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Pasar el token en los encabezados
+        Authorization: `Bearer ${token}`, // Pass token in headers
       },
     });
   } catch (error) {
-    console.error("Error al obtener los informes de la mascota:", error);
-    throw error; // Re-lanzar el error para manejarlo en el componente
+    console.error("Error fetching pet reports:", error);
+    throw error; // Re-throw error for component handling
   }
 };
 
-// Obtener un informe por ID
+// Get a report by ID
 export const getReportById = async (reportId) => {
   try {
-    const token = await AsyncStorage.getItem("token"); // Obtener el token almacenado
+    const token = await AsyncStorage.getItem("token"); // Get stored token
 
     if (!token) {
-      throw new Error("No se encontró el token de autenticación.");
+      throw new Error("Authentication token not found.");
     }
 
     return axios.get(`${API_URL}/api/reports/${reportId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Pasar el token en los encabezados
+        Authorization: `Bearer ${token}`, // Pass token in headers
       },
     });
   } catch (error) {
-    console.error("Error al obtener el informe por ID:", error);
-    throw error; // Re-lanzar el error para manejarlo en el componente
+    console.error("Error fetching report by ID:", error);
+    throw error; // Re-throw error for component handling
   }
 };
 
-// Función para actualizar un informe
+// Update a report
 export const updateReportRequest = async (reportId, updatedReportData) => {
-  const token = localStorage.getItem("token"); // Obtener token
+  const token = await AsyncStorage.getItem("token"); // Get token
 
   if (!token) {
     console.error("No token found");
@@ -53,18 +53,18 @@ export const updateReportRequest = async (reportId, updatedReportData) => {
 
   try {
     const response = await axios.put(
-      `${API}/api/reports/${reportId}`, // La ruta para actualizar el informe
-      updatedReportData, // Los datos del informe actualizados
+      `${API_URL}/api/reports/${reportId}`, // Update report route
+      updatedReportData, // Updated report data
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Incluimos el token en el encabezado
+          Authorization: `Bearer ${token}`, // Include token in header
         },
       }
     );
 
-    return response.data.report; // Devuelve el informe actualizado
+    return response.data.report; // Return updated report
   } catch (error) {
     console.error("Error updating report:", error);
-    throw new Error("No se pudo actualizar el informe.");
+    throw new Error("Failed to update the report.");
   }
 };

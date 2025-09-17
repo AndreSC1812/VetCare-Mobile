@@ -8,43 +8,43 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getVeterinarians } from "../api/veterinarians"; // Asegúrate de tener la ruta correcta
+import { getVeterinarians } from "../api/veterinarians"; // Make sure the path is correct
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const VeterinarianScreen = () => {
-  const navigation = useNavigation(); // Para navegación
-  const [veterinarians, setVeterinarians] = useState([]); // Estado para almacenar los veterinarios
-  const [loading, setLoading] = useState(true); // Indicador de carga
-  const [refreshing, setRefreshing] = useState(false); // Indicador de refresco
+  const navigation = useNavigation(); // For navigation
+  const [veterinarians, setVeterinarians] = useState([]); // State to store veterinarians
+  const [loading, setLoading] = useState(true); // Loading indicator
+  const [refreshing, setRefreshing] = useState(false); // Refresh indicator
 
-  // Hacer la solicitud a la API cuando la pantalla se enfoque
+  // Fetch veterinarians when the screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      fetchVeterinarians(); // Llamamos a la función de carga cuando la pantalla se enfoca
+      fetchVeterinarians();
     }, [])
   );
 
-  // Función para obtener los veterinarios
+  // Function to fetch veterinarians
   const fetchVeterinarians = async () => {
     try {
-      setLoading(true); // Mostrar el indicador de carga mientras se hace la solicitud
-      const data = await getVeterinarians(); // Obtener los datos de la API
-      setVeterinarians(data); // Guardar los datos en el estado
+      setLoading(true); // Show loading indicator
+      const data = await getVeterinarians(); // Fetch data from API
+      setVeterinarians(data); // Save data in state
     } catch (error) {
-      console.error("Error al obtener los veterinarios:", error);
+      console.error("Error fetching veterinarians:", error);
     } finally {
-      setLoading(false); // Cambiar el estado de carga una vez que se reciban los datos
+      setLoading(false); // Stop loading indicator
     }
   };
 
-  // Función para manejar el refresco
+  // Handle pull-to-refresh
   const handleRefresh = async () => {
-    setRefreshing(true); // Activamos el refresco
-    await fetchVeterinarians(); // Volver a obtener los datos
-    setRefreshing(false); // Desactivamos el refresco una vez que los datos se hayan cargado
+    setRefreshing(true);
+    await fetchVeterinarians();
+    setRefreshing(false);
   };
 
-  // Si los datos están cargando, mostramos un indicador de carga
+  // Show loading indicator if data is loading
   if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
@@ -53,12 +53,12 @@ const VeterinarianScreen = () => {
     );
   }
 
-  // Función que maneja el clic en un veterinario para navegar a su pantalla de detalles
+  // Handle veterinarian item click to navigate to detail screen
   const handleVetClick = (vetId) => {
-    navigation.navigate("VeterinarianDetail", { vetId }); // Navegar a VeterinarianDetailScreen pasando el vetId
+    navigation.navigate("VeterinarianDetail", { vetId });
   };
 
-  // Renderizar cada elemento de la lista de veterinarios
+  // Render each veterinarian in the list
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => handleVetClick(item._id)}
@@ -67,10 +67,10 @@ const VeterinarianScreen = () => {
       <Image source={{ uri: item.profileImage }} style={styles.profileImage} />
       <View style={styles.textContainer}>
         <Text style={styles.fullname}>
-          {item.fullname || "Sin nombre completo"}
+          {item.fullname || "No full name"}
         </Text>
         <Text style={styles.specialization}>
-          {item.specialization || "Sin especialización"}
+          {item.specialization || "No specialization"}
         </Text>
       </View>
     </TouchableOpacity>
@@ -79,11 +79,11 @@ const VeterinarianScreen = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={veterinarians} // Lista de veterinarios
-        renderItem={renderItem} // Función para renderizar cada veterinario
-        keyExtractor={(item) => item._id} // Usamos el ID del veterinario como clave
-        refreshing={refreshing} // Indica si está en proceso de refresco
-        onRefresh={handleRefresh} // Función que se ejecuta cuando se hace swipe-up
+        data={veterinarians}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
     </View>
   );
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     marginBottom: 10,
-    borderRadius: 8, // Opcional, para bordes redondeados
+    borderRadius: 8, // Optional: rounded corners
   },
   profileImage: {
     width: 50,

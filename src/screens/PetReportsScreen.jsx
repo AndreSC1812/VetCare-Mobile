@@ -7,27 +7,27 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getReportsByPet } from "../api/reports"; // Asegúrate de tener la API de informes
+import { getReportsByPet } from "../api/reports";
 
 const PetReportsScreen = ({ route, navigation }) => {
-  const { petId } = route.params; // Obtenemos el petId desde los parámetros de la ruta
-  const [reports, setReports] = useState([]); // Estado para los informes
-  const [loading, setLoading] = useState(true); // Indicador de carga
+  const { petId } = route.params;
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        setLoading(true); // Activamos el indicador de carga
-        const response = await getReportsByPet(petId); // Obtenemos los informes de la mascota usando la API
-        setReports(response.data.reports); // Guardamos los informes
+        setLoading(true);
+        const response = await getReportsByPet(petId);
+        setReports(response.data.reports);
       } catch (error) {
-        console.error("Error al obtener los informes:", error);
+        console.error("Error fetching reports:", error);
       } finally {
-        setLoading(false); // Terminamos el estado de carga
+        setLoading(false);
       }
     };
 
-    fetchReports(); // Llamamos la función cuando se monta la pantalla
+    fetchReports();
   }, [petId]);
 
   if (loading) {
@@ -40,16 +40,16 @@ const PetReportsScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Informes de la Mascota</Text>
-      {/* Aquí puedes mostrar los informes */}
+      <Text style={styles.title}>Pet Reports</Text>
+
       {reports.length > 0 ? (
         reports.map((report) => (
           <TouchableOpacity
-            key={report._id} // Usamos _id, que es la clave única del informe
+            key={report._id}
             style={styles.reportItem}
             onPress={() =>
               navigation.navigate("ReportDetail", {
-                reportId: report._id, // Pasamos el reportId a la pantalla de detalles
+                reportId: report._id,
               })
             }
           >
@@ -61,7 +61,7 @@ const PetReportsScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         ))
       ) : (
-        <Text>No hay informes disponibles para esta mascota.</Text>
+        <Text>No reports available for this pet.</Text>
       )}
     </ScrollView>
   );

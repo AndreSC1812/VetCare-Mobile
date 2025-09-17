@@ -1,21 +1,21 @@
 import { API_URL } from "@env";
 import axios from "axios";
 
-// Solicitud de registro
-export const registerRequest = (client) => {
-  return axios.post(`${API_URL}/api/auth/register`, client);
+// Registration request
+export const registerRequest = (user) => {
+  return axios.post(`${API_URL}/api/auth/register`, user);
 };
 
-// Solicitud de login
-export const loginRequest = (client) => {
-  return axios.post(`${API_URL}/api/auth/login`, client);
+// Login request
+export const loginRequest = (user) => {
+  return axios.post(`${API_URL}/api/auth/login`, user);
 };
 
-// Obtener perfil del cliente
+// Get user profile
 export const getProfile = (token) => {
   return axios.get(`${API_URL}/api/auth/profile`, {
     headers: {
-      Authorization: `Bearer ${token}`, // Enviar el token en los encabezados
+      Authorization: `Bearer ${token}`, // Send token in headers
     },
   });
 };

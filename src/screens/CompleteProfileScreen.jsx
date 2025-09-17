@@ -17,15 +17,16 @@ const CompleteProfileScreen = ({ navigation }) => {
   const [imageUri, setImageUri] = useState(null);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [fullname, setFullname] = useState(""); // Nuevo estado para fullname
+  const [fullname, setFullname] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Pick image from gallery
   const pickImage = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
-      Alert.alert("Permiso requerido", "Se necesita acceso a la galería.");
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Access to the gallery is needed.");
       return;
     }
 
@@ -40,13 +41,10 @@ const CompleteProfileScreen = ({ navigation }) => {
     }
   };
 
+  // Update profile data (fullname, phone, address)
   const updateProfileData = async () => {
     if (!phone || !address || !fullname) {
-      // Agregar fullname a la validación
-      Alert.alert(
-        "Campos incompletos",
-        "Por favor, completa todos los campos."
-      );
+      Alert.alert("Incomplete fields", "Please complete all fields.");
       return;
     }
 
@@ -60,28 +58,27 @@ const CompleteProfileScreen = ({ navigation }) => {
 
       const response = await axios.put(
         `${API_URL}/api/profile/update`,
-        { fullname, phone, address }, // Enviar fullname también
+        { fullname, phone, address },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.status === 200) {
-        Alert.alert("Éxito", "Datos del perfil actualizados correctamente.");
-
-        // Navegar a CreateFirstPetScreen después de la actualización exitosa
-        navigation.navigate("CreateFirstPet");
+        Alert.alert("Success", "Profile updated successfully.");
+        navigation.navigate("CreateFirstPet"); // Navigate to first pet screen
       } else {
-        Alert.alert("Error", "No se pudieron actualizar los datos.");
+        Alert.alert("Error", "Failed to update profile data.");
       }
     } catch (error) {
-      console.error("Error actualizando el perfil:", error);
-      Alert.alert("Error", "Hubo un error al actualizar los datos.");
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "There was an error updating your profile.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Upload profile image
   const uploadImage = async () => {
     if (!imageUri) {
       Alert.alert("No image selected", "Please select an image first");
@@ -90,7 +87,6 @@ const CompleteProfileScreen = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem("token");
-
       if (!token) {
         Alert.alert("Error", "Token missing. Please log in again.");
         return;
@@ -115,20 +111,20 @@ const CompleteProfileScreen = ({ navigation }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Éxito", "Imagen de perfil actualizada.");
-        setImageUri(response.data.profileImage); // Actualizamos la imagen en el estado
+        Alert.alert("Success", "Profile image uploaded successfully.");
+        setImageUri(response.data.profileImage); // Update image state
       } else {
-        Alert.alert("Error", "Hubo un problema al subir la imagen.");
+        Alert.alert("Error", "There was a problem uploading the image.");
       }
     } catch (error) {
-      console.error("Error subiendo la imagen:", error);
-      Alert.alert("Error", "Hubo un error al subir la imagen.");
+      console.error("Error uploading image:", error);
+      Alert.alert("Error", "There was an error uploading the image.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Completa tu perfil</Text>
+      <Text style={styles.title}>Complete Your Profile</Text>
 
       <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
         {imageUri ? (
@@ -140,14 +136,14 @@ const CompleteProfileScreen = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Nombre Completo"
+        placeholder="Full Name"
         value={fullname}
-        onChangeText={setFullname} // Actualizar fullname
+        onChangeText={setFullname}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Teléfono"
+        placeholder="Phone"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
@@ -155,7 +151,7 @@ const CompleteProfileScreen = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Dirección"
+        placeholder="Address"
         value={address}
         onChangeText={setAddress}
       />
@@ -166,7 +162,7 @@ const CompleteProfileScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Actualizando..." : "Actualizar Perfil"}
+          {loading ? "Updating..." : "Update Profile"}
         </Text>
       </TouchableOpacity>
 
@@ -176,13 +172,13 @@ const CompleteProfileScreen = ({ navigation }) => {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Subiendo..." : "Subir Imagen de Perfil"}
+          {loading ? "Uploading..." : "Upload Profile Image"}
         </Text>
       </TouchableOpacity>
 
-      <View style={styles.registerContainer}>
+      <View style={styles.backContainer}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.registerText}>Volver</Text>
+          <Text style={styles.backText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -246,12 +242,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
-  registerContainer: {
+  backContainer: {
     marginTop: 20,
     flexDirection: "row",
     justifyContent: "center",
   },
-  registerText: {
+  backText: {
     color: "#3bbba4",
     marginLeft: 5,
     textDecorationLine: "underline",

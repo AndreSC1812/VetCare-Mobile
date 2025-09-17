@@ -1,22 +1,22 @@
 import axios from "axios";
 import { API_URL } from "@env";
 
-// Función para obtener la lista de veterinarios
+// Function to get the list of veterinarians
 export const getVeterinarians = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/veterinarians`);
-    return response.data; // Retornamos los datos (veterinarios)
+    return response.data; // Return the data (veterinarians)
   } catch (error) {
-    throw error; // Lanzamos el error para que lo maneje quien llame a esta función
+    throw error; // Re-throw error for handling in the caller
   }
 };
 
-// Función para obtener un veterinario por ID
+// Function to get a veterinarian by ID
 export const getVeterinarianById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/api/veterinarians/${id}`);
-    return response.data; // Retornamos los datos del veterinario
+    return response.data; // Return the veterinarian data
   } catch (error) {
-    throw error; // Lanzamos el error para que lo maneje quien llame a esta función
+    throw error; // Re-throw error for handling in the caller
   }
 };
